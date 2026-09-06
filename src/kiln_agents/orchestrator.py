@@ -1,5 +1,6 @@
 import asyncio
 import time
+import uuid
 from dataclasses import dataclass, field
 from typing import Any, Awaitable, Callable, Dict, List, Optional, Union
 
@@ -42,6 +43,9 @@ class PipelineOptions:
     retries: Optional[int] = None
     """Default extra attempts (beyond the first) for any step that doesn't set its own `retries`."""
     on_step: Optional[Callable[[str, AgentRunResult, int], None]] = None
+    team_id: Optional[str] = None
+    """Shared ctx.team scope for every step in this run — set once per orchestrate() call unless you
+    pass one explicitly (e.g. to resume a team's memory across a separate later call)."""
 
 
 @dataclass
@@ -59,6 +63,9 @@ class PipelineResult:
     results: Dict[str, AgentRunResult]
     steps: List[PipelineStepOutcome]
     duration_ms: int
+    team_id: str = ""
+    """This run's ctx.team scope — pass it back as PipelineOptions.team_id on a later orchestrate() call
+    to resume the same shared memory instead of starting a fresh team."""
 
 
 def _default_is_valid(output: Any) -> bool:
@@ -99,8 +106,9 @@ class Orchestrator:
     async def run(self, steps: List[PipelineStep], options: Optional[PipelineOptions] = None) -> PipelineResult:
         options = options or PipelineOptions()
         started = time.monotonic()
+        team_id = options.team_id or str(uuid.uuid4())
         if not steps:
-            return PipelineResult(outputs={}, results={}, steps=[], duration_ms=0)
+            return PipelineResult(outputs={}, results={}, steps=[], duration_ms=0, team_id=team_id)
 
         by_id = {step.id: step for step in steps}
         for step in steps:
@@ -141,7 +149,7 @@ class Orchestrator:
             last: Optional[AgentRunResult] = None
             for attempt in range(1, max_attempts + 1):
                 resolved_input = await resolve_input(step)
-                last = await self._agent_runtime.run_inline_agent(step.agent, resolved_input)
+                last = await self._agent_runtime.run_inline_agent(step.agent, resolved_input, team_id=team_id)
                 if options.on_step:
                     options.on_step(step.id, last, attempt)
                 if last.status == "succeeded" and is_valid(last.output):
@@ -180,4 +188,5 @@ class Orchestrator:
             results=results,
             steps=[outcomes[step.id] for step in steps],
             duration_ms=int((time.monotonic() - started) * 1000),
+            team_id=team_id,
         )

@@ -4,8 +4,8 @@ build-backend = "hatchling.build"
 
 [project]
 name = "kiln-agents"
-version = "0.1.0"
-description = "A native Python port of kiln — build and orchestrate AI agents: unified providers (OpenAI/Groq/Ollama), a tool-calling loop, self-correcting structured output, MCP support, and a DAG orchestrator."
+version = "0.2.0"
+description = "A native Python port of kiln — build and orchestrate AI agents: unified providers (OpenAI/Groq/Ollama), a tool-calling loop, self-correcting structured output, ctx.team.ask() dynamic collaboration, full structured runtime traces, MCP support, and a DAG orchestrator."
 readme = "README.md"
 license = "MIT"
 authors = [{ name = "Abhishek Vardan Botta" }]
@@ -22,6 +22,12 @@ dependencies = [
   "pydantic>=2.6",
   "mcp>=1.2",
 ]
+
+[project.optional-dependencies]
+test = ["pytest>=8.0", "pytest-asyncio>=0.24"]
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
 
 [project.urls]
 Homepage = "https://github.com/abhishekvardanbotta/kiln"

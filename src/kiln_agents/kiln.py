@@ -5,6 +5,7 @@ from .events import EventBus
 from .orchestrator import Orchestrator, PipelineOptions, PipelineResult, PipelineStep
 from .providers import ClaudeProvider, GeminiProvider, GroqProvider, OllamaProvider, OpenAIProvider, ProviderManager
 from .runtime import AgentRunResult, AgentRuntime
+from .team import Team
 
 
 class Kiln:
@@ -22,6 +23,12 @@ class Kiln:
         """Runs a DAG of agent steps with `depends_on`, retries, a concurrency pool, and cascading
         failure isolation. The actual multi-agent orchestration primitive."""
         return await self._orchestrator.run(steps, options)
+
+    def team(self, agents: List[AgentDefinition]) -> Team:
+        """A named roster of agents that can reach each other directly via `ctx.team.ask(name, input)`,
+        on top of a shared `ctx.team` blackboard — dynamic collaboration where the running agent decides
+        at runtime who else to consult, unlike `orchestrate()`'s pre-wired DAG. See `Team`."""
+        return Team(self._agent_runtime, agents)
 
 
 def create_kiln() -> Kiln:

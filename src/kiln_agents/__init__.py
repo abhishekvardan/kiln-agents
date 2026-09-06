@@ -4,7 +4,7 @@
 """
 
 from ._errors import KilnError
-from .agent import AgentContext, AgentDefinition, AgentMemory, BoundAI, define_agent
+from .agent import AgentContext, AgentDefinition, AgentMemory, BoundAI, TeamMemory, define_agent
 from .concurrency import ConcurrencyPool
 from .events import EventBus, RuntimeEvent
 from .kiln import Kiln, create_kiln
@@ -18,6 +18,8 @@ from .orchestrator import (
     PipelineStepOutcome,
 )
 from .prompt import PromptOptions, combine_prompts, define_prompt
+from .team import Team, TeamAskRecord, TeamMember, TeamRunResult
+from .trace import TraceCapture, TraceEvent
 from .providers import (
     ChatMessage,
     ChatOptions,
@@ -36,13 +38,14 @@ from .providers import (
 from .runtime import AgentRunResult, AgentRuntime
 from .tool import Tool, ToolExecutionContext, define_tool
 
-__version__ = "0.1.0"
+__version__ = "0.2.0"
 
 __all__ = [
     "KilnError",
     "AgentContext",
     "AgentDefinition",
     "AgentMemory",
+    "TeamMemory",
     "BoundAI",
     "define_agent",
     "ConcurrencyPool",
@@ -61,6 +64,12 @@ __all__ = [
     "PromptOptions",
     "combine_prompts",
     "define_prompt",
+    "Team",
+    "TeamAskRecord",
+    "TeamMember",
+    "TeamRunResult",
+    "TraceCapture",
+    "TraceEvent",
     "ChatMessage",
     "ChatOptions",
     "ChatResult",
